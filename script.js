@@ -18,22 +18,28 @@ let drawTreeMap = (data) => {
 
     createTreeMap(hierarchy)
     let nodes = hierarchy.descendants();
-  let leaves = hierarchy.leaves();
+    let leaves = hierarchy.leaves();
 
     
-    let threatLeaves = hierarchy
-    //console.log(threatLeaves)
+    let threatLeaves = hierarchy;
+    console.log(threatLeaves, nodes);
 
-    let block = canvas.selectAll('g')
-            .data(threatLeaves)
+    let speciesBlocks = canvas.selectAll('g.speciesBlocks')
+            .data(threatLeaves) // Leaves [Species]
             .enter()
             .append('g')
+            .attr('class', "speciesBlocks")
             .attr('transform', (tree) => {
                 return 'translate(' + tree['x0'] + ', ' + tree['y0'] + ')'
             })
-            .on('click', zoom);
-    block.append('rect')
+            /*.on('click', function(event, d) { 
+                zoom(d);
+            })*/
+
+        speciesBlocks
+            .append('rect')
             //Color 7
+            .style("stroke", "black")
             .attr('fill', (tree) => {
                 let category = tree['data']['name'].split('.')[0]
                 if(category === '1'){
@@ -72,6 +78,51 @@ let drawTreeMap = (data) => {
             }).attr('height', (tree) => {
                 return tree['y1'] - tree['y0']
             })
+            /*.on('mouseover', function (event, d) {
+                tooltip.style('opacity', 1);
+                tooltip.html("<strong>" + d.data.category + "</strong><br>" +
+                "Number of species affected: " + d.data.value + "<br>" +
+                "Number of threats: " + d.data.numT + "<br>" +
+                "Species affected:" + d.data.species) //Add more information here
+                  .style('left', (event.pageX + 10) + 'px')
+                  .style('top', (event.pageY + 10) + 'px');
+              })
+              .on('mouseout', function () {
+                tooltip.style('opacity', 0);
+              })*/
+              /*.on('click', function(event, d) {
+                console.log(event, d);
+                zoom(d);
+              });*/
+
+    let blocks = canvas.selectAll('g.blocks')
+            .data(hierarchy.children) // First children [Genus]
+            .enter()
+            .append('g')
+            .attr('class', "blocks")
+            .attr('transform', (tree) => {
+                return 'translate(' + tree['x0'] + ', ' + tree['y0'] + ')'
+            })
+            /*.on('click', function(event, d) { 
+                zoom(d);
+            })*/
+
+        blocks
+            .append('rect')
+            //Color 7
+            .style("stroke", "black")
+            .attr('fill', "transparent")
+            .attr('data-name', (tree) => {
+                return tree['data']['name']
+            }).attr('data-category',(tree) => {
+                return tree['data']['name'].split('.')[0]
+            }).attr('data-spLen', (tree) => {
+                return tree['data']['num']
+            }).attr('width', (tree) => {
+                return tree['x1'] - tree['x0']
+            }).attr('height', (tree) => {
+                return tree['y1'] - tree['y0']
+            })
             .on('mouseover', function (event, d) {
                 tooltip.style('opacity', 1);
                 tooltip.html("<strong>" + d.data.category + "</strong><br>" +
@@ -84,19 +135,21 @@ let drawTreeMap = (data) => {
               .on('mouseout', function () {
                 tooltip.style('opacity', 0);
               })
-              .on('click', zoom);
+              .on('click', function(event, d) {
+                zoom(d);
+              });
 
     const tooltip = d3.select('body')
         .append('div')
         .attr('class', 'tooltip');
 
-    block.append('text')
+    blocks.append('text')
             .text((tree) => {
                 return tree['data']['name'];
             })
             .attr('x', 5)
             .attr('y', 20)
-    block.append('text')
+    blocks.append('text')
         .text((tree) => {
             return  tree['data']['category']
         })
